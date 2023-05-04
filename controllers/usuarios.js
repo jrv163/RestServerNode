@@ -8,24 +8,26 @@ const Usuario = require('../models/usuario');
 
 const usuariosGet = async(req = request, res = response ) => {
 
-    //const { q, nombre, apikey } = req.query;
-    const { limite = 5, desde = 0 } = req.query;
+    
+    const { limite = 1, desde = 0, _id } = req.query;
     const query = { estado: true }
    
 
-        const [ total, usuarios ] = await Promise.all([
+        const [ total, usuarios, user ] = await Promise.all([
             Usuario.countDocuments(query),
 
             Usuario.find(query)
             .skip( Number(desde) )
-            .limit(Number(limite)) // consulta según cantidad
+            .limit(Number(limite)), // consulta según cantidad
+            Usuario.findOne({_id}) // consulta por usuario específico
 
         ])
 
-    res.json({
-        total,
-        usuarios
-    });
+        res.json({
+            total,
+            usuarios,
+            user
+        });
 }
 
 
@@ -54,9 +56,7 @@ const usuariosPost = async(req, res = response ) => {
 const usuariosPut = async(req, res = response ) => {
 
         const id = req.params.id;
-        const { _id, password, correo, ...resto } = req.body;
-
-        // TODO: Validar con base de datos
+        const { _id, password, ...resto } = req.body;
 
         if ( password ) {
 
@@ -75,26 +75,22 @@ const usuariosPut = async(req, res = response ) => {
     }
 
 
-const usuariosPatch = ( req, res = response ) => {
-
-        res.json({
-            msg: 'patch-API - desde el controlador'
-        });
-    }
-
-
 const usuariosDelete = async(req, res = response ) => {
 
         const {id} = req.params;
 
+     
 
         // Eliminar un usuario fisicamente de la base de datos
         // const usuario = await Usuario.findByIdAndDelete( id );
 
         const usuario = await Usuario.findByIdAndUpdate( id, { estado: false } ); // Es una forma de eliminar el usuario pero sin perder la información, cambiando solo su estado
 
+        
+
         res.json({
-            usuario
+            usuario,
+    
         });
     }
 
@@ -104,7 +100,6 @@ module.exports = {
     usuariosGet,
     usuariosPost,
     usuariosPut,
-    usuariosPatch,
     usuariosDelete
 
 }
