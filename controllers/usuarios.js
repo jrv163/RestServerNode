@@ -9,24 +9,24 @@ const Usuario = require('../models/usuario');
 const usuariosGet = async(req = request, res = response ) => {
 
     
-    const { limite = 1, desde = 0, _id } = req.query;
+    const { limite = 1, desde = 0} = req.query;
     const query = { estado: true }
    
 
-        const [ total, usuarios, user ] = await Promise.all([
+        const [ total, usuarios ] = await Promise.all([
             Usuario.countDocuments(query),
 
             Usuario.find(query)
             .skip( Number(desde) )
             .limit(Number(limite)), // consulta según cantidad
-            Usuario.findOne({_id}) // consulta por usuario específico
+         
 
         ])
 
         res.json({
             total,
             usuarios,
-            user
+            
         });
 }
 
@@ -56,7 +56,7 @@ const usuariosPost = async(req, res = response ) => {
 const usuariosPut = async(req, res = response ) => {
 
         const id = req.params.id;
-        const { _id, password, ...resto } = req.body;
+        const { _id, password, google, correo, ...resto  } = req.body;
 
         if ( password ) {
 
